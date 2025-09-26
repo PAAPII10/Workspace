@@ -40,7 +40,7 @@
     "format:check": "prettier --check \"src/**/*.ts\"",
     "format:write": "prettier --write \"src/**/*.ts\"",
     "test": "jest",
-    "clean:all": "rm -rf node_modules && rm -rf pnpm-lock.yaml && rm -rf dist",
+    "clean:all": "rm -rf node_modules && rm -rf pnpm-lock.yaml && rm -rf dist .turbo",
     "clean:build": "rm -rf dist tsconfig.build.tsbuildinfo",
     "generate-exports": "cd ../../ && npx ts-node scripts/workspace/generate-library-exports.ts utils",
     "prebuild": "pnpm clean:build && pnpm generate-exports"

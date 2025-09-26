@@ -12,7 +12,7 @@
     "format": "prettier --write \"{src,apps,libs,test}/**/*.ts\"",
     "type-check": "tsc --noEmit",
     "circular-deps:check": "madge --circular --ts-config ./tsconfig.json --extensions ts,tsx src/",
-    "clean:all": "rm -rf node_modules && rm -rf yarn.lock && rm -rf dist"
+    "clean:all": "rm -rf node_modules && rm -rf pnpm-lock.yaml && rm -rf dist .turbo"
   },
   "dependencies": {
     "@nestjs/common": "^10.3.0",

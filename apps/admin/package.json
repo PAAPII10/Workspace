@@ -10,7 +10,8 @@
     "lint": "next lint",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
     "type-check": "tsc --noEmit",
-    "circular-deps:check": "madge --circular --ts-config ./tsconfig.json --extensions ts,tsx src/"
+    "circular-deps:check": "madge --circular --ts-config ./tsconfig.json --extensions ts,tsx src/",
+    "clean:all": "rm -rf node_modules && rm -rf pnpm-lock.yaml && rm -rf dist .turbo"
   },
   "dependencies": {
     "next": "^14.1.0",
