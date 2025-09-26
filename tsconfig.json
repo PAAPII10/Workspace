@@ -1,46 +1,21 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
-    "noEmit": true,
     "esModuleInterop": true,
-    "module": "ESNext",
-    "moduleResolution": "node",
+    "module": "NodeNext",
+    "moduleResolution": "nodenext",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
-    "baseUrl": ".",
-    "paths": {
-      "@arvasit/types": ["./libs/types/src"],
-      "@arvasit/types/*": ["./libs/types/src/*"],
-      "@arvasit/utils": ["./libs/utils/src"],
-      "@arvasit/utils/*": ["./libs/utils/src/*"],
-      "@arvasit/schemas": ["./libs/schemas/src"],
-      "@arvasit/schemas/*": ["./libs/schemas/src/*"],
-      "@arvasit/components": ["./libs/components/src"],
-      "@arvasit/components/*": ["./libs/components/src/*"],
-      "@arvasit/users": ["./domains/users/src"],
-      "@arvasit/users/*": ["./domains/users/src/*"],
-      "@arvasit/products": ["./domains/products/src"],
-      "@arvasit/products/*": ["./domains/products/src/*"],
-      "@arvasit/sdk": ["./packages/sdk/src"],
-      "@arvasit/sdk/*": ["./packages/sdk/src/*"]
-    }
+    "forceConsistentCasingInFileNames": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": "."
   },
-  "include": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
-  "exclude": [
-    "node_modules",
-    "**/dist",
-    "**/build",
-    "**/.next",
-    "**/storybook-static"
-  ]
+  "include": ["typedefs/*.d.ts"],
+  "exclude": ["node_modules", "dist", ".next"]
 }

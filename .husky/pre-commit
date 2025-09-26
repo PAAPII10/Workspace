@@ -1,0 +1,15 @@
+# Check if we're in the middle of a merge
+if [ -f .git/MERGE_HEAD ]; then
+  echo "🔄 Merge in progress detected - skipping pre-commit hooks to avoid stashing issues"
+  echo "💡 Please run 'pnpm lint:fix' manually after completing the merge"
+  exit 0
+fi
+
+# Check if node_modules exists
+if [ ! -d "node_modules" ]; then
+  echo "📦 Dependencies may be missing. Running pnpm install..."
+  pnpm install
+fi
+
+# Run lint-staged with better error handling
+npx lint-staged

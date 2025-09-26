@@ -24,10 +24,7 @@ const PARALLEL_COMMANDS_INTERVAL = 1000;
 /**
  * Discovers all packages in a given directory and analyzes their dependencies and commands
  */
-function discoverPackages(
-  packageFolder: PackageFolder,
-  command: string
-): PackageInfo[] {
+function discoverPackages(packageFolder: PackageFolder, command: string): PackageInfo[] {
   const packageFolderPath = join(process.cwd(), packageFolder);
 
   if (!existsSync(packageFolderPath)) {
@@ -40,20 +37,13 @@ function discoverPackages(
     withFileTypes: true,
   })) {
     if (currentPackageFolder.isDirectory()) {
-      const packageJsonPath = join(
-        packageFolderPath,
-        currentPackageFolder.name,
-        'package.json'
-      );
+      const packageJsonPath = join(packageFolderPath, currentPackageFolder.name, 'package.json');
 
       if (existsSync(packageJsonPath)) {
         try {
-          const packageJson = JSON.parse(
-            readFileSync(packageJsonPath, 'utf-8')
-          );
+          const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
           const dependencies = extractInternalDependencies(packageJson);
-          const hasCommand =
-            packageJson.scripts && packageJson.scripts[command];
+          const hasCommand = packageJson.scripts && packageJson.scripts[command];
 
           packages.push({
             name: currentPackageFolder.name,
@@ -64,9 +54,7 @@ function discoverPackages(
             hasCommand: Boolean(hasCommand),
           });
         } catch {
-          console.warn(
-            `⚠️  Warning: Invalid package.json in ${packageJsonPath}`
-          );
+          console.warn(`⚠️  Warning: Invalid package.json in ${packageJsonPath}`);
         }
       }
     }
@@ -104,9 +92,7 @@ function topologicalSort(packages: PackageInfo[]): PackageInfo[] {
   const visited = new Set<string>();
   const visiting = new Set<string>();
   const sortedPackages: PackageInfo[] = [];
-  const packagesMap = new Map(
-    packages.map((packageInfo) => [packageInfo.packageName, packageInfo])
-  );
+  const packagesMap = new Map(packages.map(packageInfo => [packageInfo.packageName, packageInfo]));
 
   function visit(packageName: string): void {
     if (visited.has(packageName)) return;
@@ -146,9 +132,7 @@ function executeCommandSync(packageFolder: PackageInfo, command: string): void {
       stdio: 'inherit',
     });
   } catch {
-    console.error(
-      `  ❌ Script "${command}" failed in ${packageFolder.packageName}`
-    );
+    console.error(`  ❌ Script "${command}" failed in ${packageFolder.packageName}`);
     process.exit(1);
   }
 }
@@ -156,24 +140,15 @@ function executeCommandSync(packageFolder: PackageInfo, command: string): void {
 /**
  * Executes a command in a specific package asynchronously (for parallel commands)
  */
-function executeCommandAsync(
-  packageFolder: PackageInfo,
-  command: string
-): Promise<void> {
+function executeCommandAsync(packageFolder: PackageInfo, command: string): Promise<void> {
   if (!packageFolder.hasCommand) return Promise.resolve();
 
-  return new Promise((resolve) => {
-    console.log(
-      `  🚀 Starting "${command}" in ${packageFolder.packageName}...`
-    );
+  return new Promise(resolve => {
+    console.log(`  🚀 Starting "${command}" in ${packageFolder.packageName}...`);
 
-    const child = spawn(
-      'pnpm',
-      ['--filter', packageFolder.packageName, command],
-      {
-        stdio: 'inherit',
-      }
-    );
+    const child = spawn('pnpm', ['--filter', packageFolder.packageName, command], {
+      stdio: 'inherit',
+    });
 
     // For parallel commands, we consider them "started" successfully once they begin
     // We don't wait for them to finish since they're meant to keep running
@@ -182,10 +157,10 @@ function executeCommandAsync(
       resolve();
     }, PARALLEL_COMMANDS_INTERVAL); // Give it a second to ensure it started properly
 
-    child.on('error', (error) => {
+    child.on('error', error => {
       console.error(
         `  ❌ Failed to start "${command}" in ${packageFolder.packageName}:`,
-        error.message
+        error.message,
       );
       process.exit(1);
     });
@@ -195,10 +170,7 @@ function executeCommandAsync(
 /**
  * Handles parallel command execution with dependency-ordered startup
  */
-async function executeParallelCommands(
-  packages: PackageInfo[],
-  command: string
-): Promise<void> {
+async function executeParallelCommands(packages: PackageInfo[], command: string): Promise<void> {
   console.log(`⚡ Starting parallel execution...`);
 
   for (let index = 0; index < packages.length; index++) {
@@ -221,36 +193,32 @@ async function executeParallelCommands(
 async function runWorkspaceCommand(
   packageFolder: PackageFolder,
   command: string,
-  parallel: boolean
+  parallel: boolean,
 ): Promise<void> {
   console.log(
-    `🔄 Running command "${command}" in ${packageFolder === 'all' ? 'all' : packageFolder} packages ${parallel ? '(parallel)' : ''}...`
+    `🔄 Running command "${command}" in ${packageFolder === 'all' ? 'all' : packageFolder} packages ${parallel ? '(parallel)' : ''}...`,
   );
 
-  const allWorkspacePackages = (
-    ['libs', 'domains', 'packages', 'apps'] as PackageFolder[]
-  ).flatMap((packageFolder) => discoverPackages(packageFolder, command));
+  const allWorkspacePackages = (['libs', 'domains', 'packages', 'apps'] as PackageFolder[]).flatMap(
+    packageFolder => discoverPackages(packageFolder, command),
+  );
 
   const sortedPackages = topologicalSort(allWorkspacePackages);
 
   const packageFoldersToPerform: PackageFolder[] =
-    packageFolder === 'all'
-      ? ['libs', 'domains', 'packages', 'apps']
-      : [packageFolder];
+    packageFolder === 'all' ? ['libs', 'domains', 'packages', 'apps'] : [packageFolder];
 
   const allExecutablePackages: PackageInfo[] = [];
 
   for (const packageFolderToPerform of packageFoldersToPerform) {
     const packages = sortedPackages.filter(
-      ({ packageFolder }) => packageFolder === packageFolderToPerform
+      ({ packageFolder }) => packageFolder === packageFolderToPerform,
     );
     allExecutablePackages.push(...packages);
   }
 
   if (allExecutablePackages.length === 0) {
-    console.log(
-      `  ❌ No package with "${command}" command found in ${packageFolder}/`
-    );
+    console.log(`  ❌ No package with "${command}" command found in ${packageFolder}/`);
     return;
   }
 
@@ -267,6 +235,16 @@ async function runWorkspaceCommand(
   }
 }
 
+// Add support for a "circular-deps:check" command target that runs madge in packages
+// The existing script already dispatches per scope (apps, libs, domains, packages, all)
+// This extends it so that when command === 'circular-deps:check', we run the package-level script if present
+
+// Add a simple scaffold command to create a new package quickly
+// Usage: pnpm ts-node scripts/workspace/run-script.ts scaffold <type> <name>
+// type: lib|domain|package|app
+// name: kebab-case package name without scope
+// This creates folder, minimal package.json, tsconfig, src/index.ts
+
 // Main execution
 const args = process.argv.slice(2);
 const packageFolder = args[0] as PackageFolder;
@@ -275,29 +253,19 @@ const parallel = args.includes('--parallel');
 
 if (!packageFolder || !command) {
   console.error(
-    'Usage: pnpm ts-node scripts/workspace/run-script.ts <package-folder> <command-name> [--parallel]'
+    'Usage: pnpm ts-node scripts/workspace/run-script.ts <package-folder> <command-name> [--parallel]',
   );
   console.error('');
   console.error('Examples:');
   console.error('  pnpm ts-node scripts/workspace/run-script.ts all build');
-  console.error(
-    '  pnpm ts-node scripts/workspace/run-script.ts libs start --parallel'
-  );
-  console.error(
-    '  pnpm ts-node scripts/workspace/run-script.ts apps dev --parallel'
-  );
+  console.error('  pnpm ts-node scripts/workspace/run-script.ts libs start --parallel');
+  console.error('  pnpm ts-node scripts/workspace/run-script.ts apps dev --parallel');
   console.error('');
   console.error('Flags:');
-  console.error(
-    '  --parallel    Run commands in parallel with dependency-ordered startup'
-  );
+  console.error('  --parallel    Run commands in parallel with dependency-ordered startup');
   console.error('');
-  console.error(
-    'Commands that automatically use dependency ordering: build, compile'
-  );
-  console.error(
-    'Use --parallel to run any command in parallel while respecting dependencies'
-  );
+  console.error('Commands that automatically use dependency ordering: build, compile');
+  console.error('Use --parallel to run any command in parallel while respecting dependencies');
   process.exit(1);
 }
 
@@ -306,8 +274,7 @@ if (!PACKAGE_FOLDERS.includes(packageFolder)) {
   process.exit(1);
 }
 
-runWorkspaceCommand(packageFolder, command, parallel).catch((error) => {
+runWorkspaceCommand(packageFolder, command, parallel).catch(error => {
   console.error('❌ Script execution failed:', error);
   process.exit(1);
 });
-

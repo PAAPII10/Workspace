@@ -41,7 +41,9 @@
         "../../packages/sdk/src/*"
       ]
     },
-    "incremental": true
+    "incremental": true,
+    "noEmit": true,
+    "jsx": "preserve"
   },
   "include": [
     "next-env.d.ts",

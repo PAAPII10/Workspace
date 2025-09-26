@@ -1,0 +1,164 @@
+name: CI (pnpm + Turbo)
+
+on:
+  push:
+    branches: [ main, integration, integration-next ]
+  pull_request:
+    branches:
+    - '**'
+  workflow_dispatch:
+
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-updates:
+    name: 🔍 Check for updates
+    runs-on: ubuntu-latest
+    outputs:
+      force_full_ci: ${{ steps.check_force.outputs.force_full_ci }}
+      changed_libs: ${{ steps.check_changes.outputs.changed_libs }}
+      changed_domains: ${{ steps.check_changes.outputs.changed_domains }}
+      changed_admin: ${{ steps.check_changes.outputs.changed_admin }}
+      changed_web: ${{ steps.check_changes.outputs.changed_web }}
+      changed_backend: ${{ steps.check_changes.outputs.changed_backend }}
+      changed_packages: ${{ steps.check_changes.outputs.changed_packages }}
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: 🔋 Check for full CI run
+      id: check_force
+      run: |
+        COMMIT_MSG=$(git log --format=%B -n 1 ${{ github.event.pull_request.head.sha }})
+        echo "force_full_ci=$(echo "$COMMIT_MSG" | grep -iq '\bfull-ci\b' && echo true || echo false)" >> $GITHUB_OUTPUT
+
+    - name: 🗒️ Check for changes in folders
+      id: check_changes
+      if: steps.check_force.outputs.force_full_ci == 'false'
+      run: |
+        BASE_BRANCH="${{ github.event.pull_request.base.ref || 'main' }}"
+        git fetch origin $BASE_BRANCH
+        CHANGED=$(git diff --name-only origin/$BASE_BRANCH...HEAD)
+
+        echo "changed_libs=$(echo "$CHANGED" | grep -q '^libs/' && echo true || echo false)" >> $GITHUB_OUTPUT
+        echo "changed_domains=$(echo "$CHANGED" | grep -q '^domains/' && echo true || echo false)" >> $GITHUB_OUTPUT
+        echo "changed_admin=$(echo "$CHANGED" | grep -q '^apps/admin/' && echo true || echo false)" >> $GITHUB_OUTPUT
+        echo "changed_web=$(echo "$CHANGED" | grep -q '^apps/web/' && echo true || echo false)" >> $GITHUB_OUTPUT
+        echo "changed_backend=$(echo "$CHANGED" | grep -q '^apps/backend/' && echo true || echo false)" >> $GITHUB_OUTPUT
+        echo "changed_packages=$(echo "$CHANGED" | grep -q '^packages/' && echo true || echo false)" >> $GITHUB_OUTPUT
+
+  setup:
+    name: 🛠 Setup
+    runs-on: ubuntu-latest
+    needs: check-updates
+    if: needs.check-updates.outputs.force_full_ci == 'true' || needs.check-updates.outputs.changed_libs == 'true' || needs.check-updates.outputs.changed_domains == 'true' || needs.check-updates.outputs.changed_admin == 'true' || needs.check-updates.outputs.changed_web == 'true' || needs.check-updates.outputs.changed_backend == 'true' || needs.check-updates.outputs.changed_packages == 'true'
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 22.x
+        cache: 'pnpm'
+    - uses: pnpm/action-setup@v4
+      with:
+        version: 10
+    - name: 📦 Install deps
+      run: pnpm install --frozen-lockfile
+
+  libs:
+    name: 📚 Libraries
+    runs-on: ubuntu-latest
+    needs: [ check-updates, setup ]
+    if: needs.check-updates.outputs.force_full_ci == 'true' || needs.check-updates.outputs.changed_libs == 'true'
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 22.x
+        cache: 'pnpm'
+    - uses: pnpm/action-setup@v4
+      with:
+        version: 10
+    - run: pnpm install --frozen-lockfile
+    - run: pnpm build --filter ./libs...
+    - run: pnpm lint --filter ./libs...
+    - run: pnpm test --filter ./libs...
+
+  domains:
+    name: 🏛️ Domains
+    runs-on: ubuntu-latest
+    needs: [ check-updates, libs, setup ]
+    if: needs.check-updates.outputs.force_full_ci == 'true' || needs.check-updates.outputs.changed_domains == 'true'
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 22.x
+        cache: 'pnpm'
+    - uses: pnpm/action-setup@v4
+      with:
+        version: 10
+    - run: pnpm install --frozen-lockfile
+    - run: pnpm build --filter ./libs... --filter ./domains...
+    - run: pnpm lint --filter ./domains...
+    - run: pnpm test --filter ./domains...
+
+  admin:
+    name: 👩‍🚀 Admin
+    runs-on: ubuntu-latest
+    needs: [ check-updates, libs, domains, setup ]
+    if: needs.check-updates.outputs.force_full_ci == 'true' || needs.check-updates.outputs.changed_admin == 'true'
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 22.x
+        cache: 'pnpm'
+    - uses: pnpm/action-setup@v4
+      with:
+        version: 10
+    - run: pnpm install --frozen-lockfile
+    - run: pnpm build --filter ./libs... --filter ./domains...
+    - run: pnpm --filter='@arvasit/admin' lint
+    - run: pnpm --filter='@arvasit/admin' build
+
+  web:
+    name: 🌍 Web
+    runs-on: ubuntu-latest
+    needs: [ check-updates, libs, domains, setup ]
+    if: needs.check-updates.outputs.force_full_ci == 'true' || needs.check-updates.outputs.changed_web == 'true'
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 22.x
+        cache: 'pnpm'
+    - uses: pnpm/action-setup@v4
+      with:
+        version: 10
+    - run: pnpm install --frozen-lockfile
+    - run: pnpm build --filter ./libs... --filter ./domains...
+    - run: pnpm --filter='@arvasit/web' lint
+    - run: pnpm --filter='@arvasit/web' build
+
+  backend:
+    name: 🧠 Backend
+    runs-on: ubuntu-latest
+    needs: [ check-updates, libs, domains, setup ]
+    if: needs.check-updates.outputs.force_full_ci == 'true' || needs.check-updates.outputs.changed_backend == 'true'
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 22.x
+        cache: 'pnpm'
+    - uses: pnpm/action-setup@v4
+      with:
+        version: 10
+    - run: pnpm install --frozen-lockfile
+    - run: pnpm build --filter ./libs... --filter ./domains...
+    - run: pnpm --filter='@arvasit/backend' lint
+    - run: pnpm --filter='@arvasit/backend' build

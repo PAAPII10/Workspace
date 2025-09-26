@@ -29,11 +29,7 @@ function findLibraryPath(libraryName: string): string | null {
 
 function shouldSkipFile(fileName: string): boolean {
   // Skip test files and test directories
-  if (
-    fileName.endsWith('.spec.ts') ||
-    fileName.endsWith('.test.ts') ||
-    fileName.startsWith('__')
-  ) {
+  if (fileName.endsWith('.spec.ts') || fileName.endsWith('.test.ts') || fileName.startsWith('__')) {
     return true;
   }
   return false;
@@ -101,7 +97,7 @@ function generateExports(exportPaths: string[]): Exports {
   const exports: Exports = {};
 
   // Add root export
-  exports['./'] = {
+  exports['.'] = {
     types: './dist/index.d.ts',
     require: './dist/index.js',
     import: './dist/index.js',
@@ -130,10 +126,7 @@ function updatePackageJson(libraryPath: string, exports: Exports): void {
   packageJson.exports = exports;
 
   // Write back to file with proper formatting
-  fs.writeFileSync(
-    packageJsonPath,
-    JSON.stringify(packageJson, null, 2) + '\n'
-  );
+  fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n');
 }
 
 function main() {
@@ -141,12 +134,8 @@ function main() {
 
   if (args.length === 0) {
     console.error('❌ Error: Library name is required');
-    console.log(
-      'Usage: pnpm ts-node scripts/generate-library-exports.ts <library-name>'
-    );
-    console.log(
-      'Example: pnpm ts-node scripts/generate-library-exports.ts utils'
-    );
+    console.log('Usage: pnpm ts-node scripts/generate-library-exports.ts <library-name>');
+    console.log('Example: pnpm ts-node scripts/generate-library-exports.ts utils');
     process.exit(1);
   }
 
@@ -156,9 +145,7 @@ function main() {
   const libraryPath = findLibraryPath(libraryName);
 
   if (!libraryPath) {
-    console.error(
-      `❌ Error: Library '${libraryName}' not found in libs/, domains/, or packages/`
-    );
+    console.error(`❌ Error: Library '${libraryName}' not found in libs/, domains/, or packages/`);
     process.exit(1);
   }
 
@@ -187,9 +174,7 @@ function main() {
 
   try {
     updatePackageJson(libraryPath!, exports);
-    console.log(
-      `✅ Generated ${exportPaths.length + 1} exports for @arvasit/${libraryName}`
-    );
+    console.log(`✅ Generated ${exportPaths.length + 1} exports for @arvasit/${libraryName}`);
   } catch (error) {
     console.error(`❌ Error updating package.json: ${error}`);
     process.exit(1);

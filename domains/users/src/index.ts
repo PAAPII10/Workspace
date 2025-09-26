@@ -1,39 +1,4 @@
 import { z } from 'zod';
-import { BaseEntity, UserRole } from '@arvasit/types';
-
-// User DTOs
-export interface UserDto extends BaseEntity {
-  email: string;
-  name: string;
-  role: UserRole;
-  isActive: boolean;
-  lastLoginAt?: Date;
-}
-
-export interface CreateUserDto {
-  email: string;
-  name: string;
-  role?: UserRole;
-  password: string;
-}
-
-export interface UpdateUserDto {
-  email?: string;
-  name?: string;
-  role?: UserRole;
-  isActive?: boolean;
-}
-
-export interface UserLoginDto {
-  email: string;
-  password: string;
-}
-
-export interface UserResponseDto {
-  user: UserDto;
-  token: string;
-  refreshToken: string;
-}
 
 // User Schemas
 export const UserDtoSchema = z.object({

@@ -117,4 +117,3 @@ The script uses `pnpm --filter` to run commands in specific packages, ensuring:
 2. **Parallel for Long-Running Commands**: Use `--parallel` for dev servers, tests, etc.
 3. **Sequential for Builds**: Use without `--parallel` for build commands that depend on each other
 4. **Test First**: Always test with a subset of packages before running on all packages
-

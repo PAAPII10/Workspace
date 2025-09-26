@@ -3,30 +3,7 @@
   "version": "1.0.0",
   "description": "Products domain module with DTOs, schemas, and types",
   "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
-  "exports": {
-    "./": {
-      "types": "./dist/index.d.ts",
-      "require": "./dist/index.js",
-      "import": "./dist/index.js"
-    },
-    "./dto": {
-      "types": "./dist/dto.d.ts",
-      "require": "./dist/dto.js",
-      "import": "./dist/dto.js"
-    },
-    "./schema/product.schema": {
-      "types": "./dist/schema/product.schema.d.ts",
-      "require": "./dist/schema/product.schema.js",
-      "import": "./dist/schema/product.schema.js"
-    },
-    "./types/product.types": {
-      "types": "./dist/types/product.types.d.ts",
-      "require": "./dist/types/product.types.js",
-      "import": "./dist/types/product.types.js"
-    }
-  },
   "scripts": {
     "compile": "tsc",
     "build": "tsc --build ./tsconfig.build.json",
@@ -37,8 +14,7 @@
     "test": "jest",
     "clean:all": "rm -rf node_modules && rm -rf pnpm-lock.yaml && rm -rf dist",
     "clean:build": "rm -rf dist tsconfig.build.tsbuildinfo",
-    "generate-exports": "cd ../../ && npx ts-node scripts/workspace/generate-library-exports.ts products",
-    "prebuild": "pnpm clean:build && pnpm generate-exports"
+    "prebuild": "pnpm clean:build"
   },
   "dependencies": {
     "@arvasit/types": "workspace:*",
@@ -51,8 +27,5 @@
     "@types/jest": "^29.5.8",
     "eslint": "^8.55.0",
     "prettier": "^3.1.0"
-  },
-  "files": [
-    "dist"
-  ]
+  }
 }

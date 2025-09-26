@@ -6,7 +6,7 @@
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "exports": {
-    "./": {
+    ".": {
       "types": "./dist/index.d.ts",
       "require": "./dist/index.js",
       "import": "./dist/index.js"
@@ -51,8 +51,5 @@
     "@types/jest": "^29.5.8",
     "eslint": "^8.55.0",
     "prettier": "^3.1.0"
-  },
-  "files": [
-    "dist"
-  ]
+  }
 }

@@ -80,9 +80,9 @@ export const ProductCategorySchema = z.object({
 
 // Type exports
 export type BaseEntity = z.infer<typeof BaseEntitySchema>;
-export type ApiResponse<T = any> = z.infer<ReturnType<typeof ApiResponseSchema>>;
+export type ApiResponse<_T = any> = z.infer<ReturnType<typeof ApiResponseSchema>>;
 export type PaginationParams = z.infer<typeof PaginationParamsSchema>;
-export type PaginatedResponse<T = any> = z.infer<ReturnType<typeof PaginatedResponseSchema>>;
+export type PaginatedResponse<_T = any> = z.infer<ReturnType<typeof PaginatedResponseSchema>>;
 export type UserRole = z.infer<typeof UserRoleSchema>;
 export type User = z.infer<typeof UserSchema>;
 export type CreateUser = z.infer<typeof CreateUserSchema>;

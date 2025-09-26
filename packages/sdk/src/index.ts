@@ -1,6 +1,17 @@
+import {
+  CreateProductDto,
+  ProductDto,
+  ProductSearchDto,
+  UpdateProductDto,
+} from '@arvasit/products';
 import { ApiResponse, PaginatedResponse } from '@arvasit/types';
-import { UserDto, CreateUserDto, UpdateUserDto, UserLoginDto, UserResponseDto } from '@arvasit/users';
-import { ProductDto, CreateProductDto, UpdateProductDto, ProductSearchDto } from '@arvasit/products';
+import {
+  CreateUserDto,
+  UpdateUserDto,
+  UserDto,
+  UserLoginDto,
+  UserResponseDto,
+} from '@arvasit/users';
 
 export interface ApiClientConfig {
   baseUrl: string;
@@ -18,14 +29,11 @@ export class ApiClient {
     };
   }
 
-  private async request<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<ApiResponse<T>> {
+  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
     const url = `${this.config.baseUrl}${endpoint}`;
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      ...options.headers,
+      ...(options.headers as Record<string, string>),
     };
 
     if (this.config.apiKey) {
@@ -54,10 +62,8 @@ export class ApiClient {
   }
 
   // User API methods
-  async getUsers(page = 1, limit = 10): Promise<PaginatedResponse<UserDto>> {
-    return this.request<PaginatedResponse<UserDto>>(
-      `/users?page=${page}&limit=${limit}`
-    );
+  async getUsers(page = 1, limit = 10): Promise<ApiResponse<PaginatedResponse<UserDto>>> {
+    return this.request<PaginatedResponse<UserDto>>(`/users?page=${page}&limit=${limit}`);
   }
 
   async getUser(id: string): Promise<ApiResponse<UserDto>> {
@@ -92,7 +98,9 @@ export class ApiClient {
   }
 
   // Product API methods
-  async getProducts(searchParams?: ProductSearchDto): Promise<PaginatedResponse<ProductDto>> {
+  async getProducts(
+    searchParams?: ProductSearchDto,
+  ): Promise<ApiResponse<PaginatedResponse<ProductDto>>> {
     const params = new URLSearchParams();
     if (searchParams) {
       Object.entries(searchParams).forEach(([key, value]) => {

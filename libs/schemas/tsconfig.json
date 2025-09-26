@@ -1,13 +1,16 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "./dist",
-    "rootDir": "./src",
+    "target": "es5",
+    "noEmit": false,
+    "module": "NodeNext",
+    "moduleResolution": "nodenext",
     "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "composite": true
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "preserveSymlinks": true,
+    "declarationMap": true
   },
-  "include": ["src/**/*"],
+  "include": ["src"],
   "exclude": ["node_modules", "dist"]
 }
