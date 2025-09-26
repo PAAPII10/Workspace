@@ -105,3 +105,6 @@ temp/
 # TypeScript
 **/*.tsbuildinfo
 **/next-env.d.ts
+.
+# Turbo
+.turbo

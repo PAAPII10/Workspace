@@ -14,6 +14,17 @@ const config: StorybookConfig = {
   docs: {
     autodocs: 'tag',
   },
+  viteFinal: async config => {
+    // Add Tailwind CSS support
+    const { mergeConfig } = await import('vite');
+    return mergeConfig(config, {
+      css: {
+        postcss: {
+          plugins: [require('tailwindcss'), require('autoprefixer')],
+        },
+      },
+    });
+  },
 };
 
 export default config;
